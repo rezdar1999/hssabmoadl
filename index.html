@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من تصميم ريزدار للحساب المعدل</title>
+    <style>
+        /* الخلفية والتصميم العام */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+            margin: 0;
+        }
+        
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* حواف وزوايا لطيفة */
+        .year {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .year:hover {
+            transform: translateY(-5px);
+        }
+
+        /* الجدول */
+        table {
+            margin: 20px auto;
+            width: 85%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            font-size: 18px;
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* تأثير على الأزرار */
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* التأثيرات على القوائم المنسدلة */
+        select {
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff;
+            color: #333;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        select:focus {
+            box-shadow: 0 0 10px rgba(99, 173, 255, 0.6);
+            outline: none;
+        }
+
+        /* عرض النتائج */
+        .result {
+            font-size: 20px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* التصميم العام للنص */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .masterGPAButton {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+        }
+
+        .masterGPAButton:hover {
+            background: linear-gradient(135deg, #feb47b, #ff7e5f);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تصميم ريزدار للحساب المعدل الجامعي</h1>
+        <div id="yearsContainer">
+            <div class="year" id="year1Container">
+                <h2>السنة الأولى</h2>
+                <table id="gpaTable1">
+                    <thead>
+                        <tr>
+                            <th>الدرجة (رمز)</th>
+                            <th>عدد الساعات (DS)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+                <button onclick="addRow('gpaTable1')">إضافة سطر جديد</button>
+                <div class="result" id="year1GPAResult"></div>
+            </div>
+        </div>
+        <button onclick="addYear()">إضافة سنة أخرى</button>
+        <button onclick="calculateAllGPA()">حساب المعدل النهائي</button>
+        
+        <!-- تم إضافة قسم لحساب المعدل للماجستير -->
+        <button class="masterGPAButton" onclick="calculateMasterGPA()">حساب معدل الماجستير</button>
+        <div class="result" id="masterGPAResult"></div>
+    </div>
+
+    <script>
+        const gradeMapping = {
+            "FF": 40,
+            "DD": 54.5,
+            "DC": 64.5,
+            "CC": 72,
+            "CB": 77,
+            "BB": 82,
+            "BA": 88,
+            "AA": 94.5
+        };
+
+        let yearCount = 1;
+
+        function addRow(tableId) {
+            const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            if (table.rows.length >= 15) return alert("لا يمكن إضافة أكثر من 15 سطرًا");
+
+            const row = table.insertRow();
+
+            const gradeCell = row.insertCell(0);
+            const dsCell = row.insertCell(1);
+
+            gradeCell.innerHTML = ` 
+                <select>
+                    ${Object.keys(gradeMapping).map(grade => `<option value="${gradeMapping[grade]}">${grade}</option>`).join('')}
+                </select>`;
+
+            dsCell.innerHTML = ` 
+                <select>
+                    ${[...Array(9).keys()].map(i => `<option value="${i + 1}">${i + 1}</option>`).join('')}
+                </select>`;
+        }
+
+        function addYear() {
+            yearCount++;
+
+            const yearContainer = document.createElement('div');
+            yearContainer.className = 'year';
+            yearContainer.id = `year${yearCount}Container`;
+            yearContainer.innerHTML = `
+                <h2>السنة ${yearCount}</h2>
+                <table id="gpaTable${yearCount}">
+                    <thead>
+                        <tr>
+                            <th>الدرجة (رمز)</th>
+                            <th>عدد الساعات (DS)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+                <button onclick="addRow('gpaTable${yearCount}')">إضافة سطر جديد</button>
+                <div class="result" id="year${yearCount}GPAResult"></div>`;
+
+            document.getElementById('yearsContainer').appendChild(yearContainer);
+        }
+
+        function calculateGPAForYear(yearId) {
+            let total = 0;
+            let totalDS = 0;
+
+            const rows = document.getElementById(`gpaTable${yearId}`).getElementsByTagName('tbody')[0].rows;
+
+            for (let row of rows) {
+                const gradeValue = parseFloat(row.cells[0].getElementsByTagName('select')[0].value);
+                const dsValue = parseInt(row.cells[1].getElementsByTagName('select')[0].value);
+                total += gradeValue * dsValue;
+                totalDS += dsValue;
+            }
+
+            const yearGPA = totalDS ? (total / totalDS).toFixed(2) : 0;
+            document.getElementById(`year${yearId}GPAResult`).textContent = `معدل السنة ${yearId}: ${yearGPA}٪`;
+
+            return { yearGPA: parseFloat(yearGPA), totalDS };
+        }
+
+        function calculateAllGPA() {
+            let finalTotal = 0;
+            let finalDS = 0;
+
+            for (let i = 1; i <= yearCount; i++) {
+                const { yearGPA, totalDS } = calculateGPAForYear(i);
+                finalTotal += yearGPA * totalDS;
+                finalDS += totalDS;
+            }
+
+            const finalGPA = finalDS ? (finalTotal / finalDS).toFixed(2) : 0;
+        }
+
+        function calculateMasterGPA() {
+            let masterTotal = 0;
+
+            for (let i = 1; i <= yearCount; i++) {
+                const { yearGPA } = calculateGPAForYear(i);
+
+                let weight = 0;
+                if (i === 1) weight = 0.10; 
+                else if (i === 2) weight = 0.20;  
+                else if (i === 3) weight = 0.30;  
+                else if (i === 4) weight = 0.40;  
+
+                masterTotal += yearGPA * weight;
+            }
+
+            document.getElementById('masterGPAResult').textContent = `المعدل النهائي للماجستير: ${masterTotal.toFixed(2)}٪`;
+        }
+    </script>
+</body>
+</html>
